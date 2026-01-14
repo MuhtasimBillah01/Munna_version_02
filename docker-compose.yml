@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: metron-web
+    ports:
+      - "80:80"
+    restart: always
+    environment:
+      - NODE_ENV=production
+    deploy:
+      resources:
+        limits:
+          cpus: '2.00'
+          memory: 7G
+        reservations:
+          cpus: '0.50'
+          memory: 2G
+    networks:
+      - metron-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: metron-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=metron
+      - DATABASE_HOST=db
+      - REDIS_HOST=redis
+    depends_on:
+      - db
+      - redis
+    networks:
+      - metron-network
+    command: uvicorn apps.api.main:app --host 0.0.0.0 --port 8000 --reload
+
+  db:
+    image: timescale/timescaledb:latest-pg14
+    container_name: metron-db
+    restart: always
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=metron
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - metron-network
+
+  redis:
+    image: redis:alpine
+    container_name: metron-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - metron-network
+
+  research:
+    build:
+      context: .
+      dockerfile: Dockerfile.research
+    container_name: metron-research
+    # Jupyter Lab start command with security token 'metron'
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='metron'
+    volumes:
+      - ./notebooks:/app/notebooks # Mirroring notebooks folder
+      - ./src:/app/src # Access to main source code logic
+    ports:
+      - "8888:8888"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50' # Requested: Half Core
+          memory: 1.5G # Requested: 1.5 GB RAM
+        reservations:
+          cpus: '0.10'
+          memory: 500M
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=metron
+      - DATABASE_HOST=db # Internal Docker Network Hostname
+    networks:
+      - metron-network
+    restart: always
+
+networks:
+  metron-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
