@@ -17,12 +17,12 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: process.env.API_URL || 'http://localhost:8000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
       '/ws': {
-        target: 'ws://localhost:8000',
+        target: (process.env.API_URL || 'http://localhost:8000').replace('http', 'ws'),
         ws: true,
         changeOrigin: true,
       },

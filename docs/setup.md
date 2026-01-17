@@ -57,3 +57,7 @@ The research environment is isolated in a Docker container.
 - [x] Windows Task Scheduler (.bat startup) **(Done)**
 - [x] Startup Timeout (90s/240s) **(Done)**
 - [x] Holiday Check Logic **(Done)**
+
+
+## ?? Type Automation
+We use automated type generation. See [Type Automation Guide](type_automation_guide.md) for details on how to generate types (pnpm gen:types) or remove the feature.

@@ -506,3 +506,9 @@ UI অ্যাডভান্স: TUI Dashboard ratatui (২৭০) src/rust/ui
 - [ ] 279. রিস্ক ম্যানেজমেন্ট অ্যাডভান্স (20% রিস্ক রিডাকশন)।
 - [ ] 280. ফাইনাল কোড শেয়ার (গিটহাব রেপো)।
 
+
+
+## ?? Front-Back Sync Rule
+- Use pnpm gen:types to sync Backend models to Frontend.
+- Do NOT manually write interfaces that mirror Backend Pydantic models.
+- See [Type Automation Guide](type_automation_guide.md).

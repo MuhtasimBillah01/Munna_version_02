@@ -5,12 +5,21 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: builder
     container_name: metron-web
     ports:
-      - "80:80"
+      - "4700:4700"
     restart: always
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/web/node_modules
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
+      - API_URL=http://api:8000
+    command: >
+      
+      sh -c " echo 'Waiting for API...' && pnpm dlx wait-on http://api:8000/openapi.json && echo 'API is ready! Generating types...' && cd apps/web && pnpm exec openapi-typescript http://api:8000/openapi.json -o src/shared/api/schema.d.ts && echo 'Types generated. Starting Web...' && pnpm run dev "
     deploy:
       resources:
         limits:
